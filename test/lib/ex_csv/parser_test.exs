@@ -4,8 +4,11 @@ defmodule ExCsv.ParserTest do
   test "one simple line" do
     assert ExCsv.Parser.parse(~s<a,b,c>) == [["a", "b", "c"]]
   end
-  test "one simple line with a space in a phrase" do
+  test "one simple line with a space in a field" do
     assert ExCsv.Parser.parse(~s<a,ba t,c>) == [["a", "ba t", "c"]]
+  end
+  test "one simple line with a quoted field containing the delimiter" do
+    assert ExCsv.Parser.parse(~s<a,"ba,t",c>) == [["a", "ba,t", "c"]]
   end
   test "one simple line that starts with a delimiter" do
     assert ExCsv.Parser.parse(~s<,a,b,c>) == [["", "a", "b", "c"]]

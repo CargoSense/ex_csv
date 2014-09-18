@@ -1,5 +1,5 @@
 defmodule ExCsv.Parser do
-  defstruct delimiter: 44, newline: 10, quote: 34
+  defstruct delimiter: 44, newline: 10, quote: 34, quoting: false
 
   def parse(text) do
     parse(text, %ExCsv.Parser{})
@@ -14,16 +14,26 @@ defmodule ExCsv.Parser do
 
   # DELIMITER
   # At the beginning of a row
-  defp build(<<char>> <> rest, [[] | previous_rows], %{delimiter: char} = settings) do
+  defp build(<<char>> <> rest, [[] | previous_rows], %{delimiter: char, quoting: false} = settings) do
     current_row = [new_field, new_field]
     rows = [current_row | previous_rows]
     rest |> skip_whitespace |> build(rows, settings)
   end
   # After the beginning of a row
-  defp build(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{delimiter: char} = settings) do
+  defp build(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{delimiter: char, quoting: false} = settings) do
     current_row = [new_field | [current_field |> String.rstrip | previous_fields]]
     rows = [current_row | previous_rows]
     rest |> skip_whitespace |> build(rows, settings)
+  end
+
+  # QUOTE
+  # Start quote
+  defp build(<<char>> <> rest, rows, %{quote: char, quoting: false} = settings) do
+    rest |> build(rows, %{ settings | quoting: true })
+  end
+  # End quote
+  defp build(<<char>> <> rest, rows, %{quote: char, quoting: true} = settings) do
+    rest |> build(rows, %{ settings | quoting: false })
   end
 
   # NEWLINE
