@@ -1,19 +1,35 @@
 defmodule ExCsv.Parser do
   defstruct delimiter: 44, newline: 10, quote: 34, quoting: false, eat_next_quote: true
 
-  def parse(text) do
-    parse(text, %ExCsv.Parser{})
+  def parse(text, opts \\ []) do
+    do_parse(text, opts |> configure)
   end
-  def parse(iodata, config) when is_list(iodata) do
+
+  defp do_parse(iodata, config) when is_list(iodata) do
     iodata |> IO.iodata_to_binary |> parse(config)
   end
-  def parse(string, config) when is_binary(string) do
+  defp do_parse(string, config) when is_binary(string) do
     {result, state} = string |> skip_whitespace |> build([[]], config)
     if state.quoting do
       {:error, "quote meets end of file"}
     else
       {:ok, result |> Enum.reverse |> Enum.map &(Enum.reverse(&1))}
     end
+  end
+
+  defp configure(settings)  do
+    settings |> configure(%ExCsv.Parser{})
+  end
+
+  defp configure([], config), do: config
+  defp configure([head | tail], config) do
+    tail |> configure(config |> Map.merge(head |> setting))
+  end
+
+  # The delimiter, newline, and quote settings need to be integers
+  # @spec setting({atom, char_list}) :: %{atom => integer}
+  defp setting({key, value}) when key in [:delimiter, :newline, :quote] do
+    [{key, value |> hd}] |> Enum.into(%{})
   end
 
   # DELIMITER

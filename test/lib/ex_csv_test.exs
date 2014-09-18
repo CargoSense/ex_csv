@@ -6,7 +6,7 @@ defmodule ExCsvTest do
   end
 
   test "parse delegate with a custom setting" do
-    assert ExCsv.parse("a;b;c", %ExCsv.Parser{delimiter: ';' |> hd}) == {:ok, [~w(a b c)]}
+    assert ExCsv.parse("a;b;c", delimiter: ';') == {:ok, [~w(a b c)]}
   end
 
 end
