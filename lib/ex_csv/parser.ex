@@ -22,8 +22,8 @@ defmodule ExCsv.Parser do
   end
 
   # Newline
-  defp value(<<char>> <> rest, lines, %{newline: char} = settings) do
-    value(skip_whitespace(rest), [[] | lines], settings)
+  defp value(<<char>> <> rest, [[phrase | phrases] | previous], %{newline: char} = settings) do
+    value(skip_whitespace(rest), [[] | [[ phrase |> String.rstrip | phrases] | previous]], settings)
   end
 
   # First phrase in a line
