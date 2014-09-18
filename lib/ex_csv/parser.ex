@@ -5,38 +5,43 @@ defmodule ExCsv.Parser do
     parse(text, %ExCsv.Parser{})
   end
   def parse(iodata, settings) when is_list(iodata) do
-    IO.iodata_to_binary(iodata) |> parse(settings)
+    iodata |> IO.iodata_to_binary |> parse(settings)
   end
   def parse(string, settings) when is_binary(string) do
     read(skip_whitespace(string), [[]], settings)
     |> Enum.reverse |> Enum.map &(Enum.reverse(&1))
   end
 
-  # Delimiter at the beginning of a line
-  defp read(<<char>> <> rest, [[] | previous_lines], %{delimiter: char} = settings) do
-    read(skip_whitespace(rest), [["", ""] | previous_lines], settings)
+  # Delimiter at the beginning of a row
+  defp read(<<char>> <> rest, [[] | previous_rows], %{delimiter: char} = settings) do
+    rows = [["", ""] | previous_rows]
+    rest |> skip_whitespace |> read(rows, settings)
   end
-  # Delimiter after the beginning of a line
-  defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_lines], %{delimiter: char} = settings) do
-    read(skip_whitespace(rest), [["" | [current_field |> String.rstrip | previous_fields]] | previous_lines], settings)
+  # Delimiter after the beginning of a row
+  defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{delimiter: char} = settings) do
+    rows = [["" | [current_field |> String.rstrip | previous_fields]] | previous_rows]
+    rest |> skip_whitespace |> read(rows, settings)
   end
 
   # Newline
-  defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_lines], %{newline: char} = settings) do
-    read(skip_whitespace(rest), [[] | [[current_field |> String.rstrip | previous_fields] | previous_lines]], settings)
+  defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{newline: char} = settings) do
+    rows = [[] | [[current_field |> String.rstrip | previous_fields] | previous_rows]]
+    rest |> skip_whitespace |> read(rows, settings)
   end
 
-  # Starting the first field in the current line
-  defp read(<<char>> <> rest, [[] | previous_lines], settings) do
-    read(rest, [[[char] |> IO.iodata_to_binary] | previous_lines], settings)
+  # Starting the first field in the current row
+  defp read(<<char>> <> rest, [[] | previous_rows], settings) do
+    rows = [[[char] |> IO.iodata_to_binary] | previous_rows]
+    rest |> read(rows, settings)
   end
-  # Adding to the last field in the current line
-  defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_lines], settings) do
-    read(rest, [[current_field <> ([char] |> IO.iodata_to_binary) | previous_fields] | previous_lines], settings)
+  # Adding to the last field in the current row
+  defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], settings) do
+    rows = [[current_field <> ([char] |> IO.iodata_to_binary) | previous_fields] | previous_rows]
+    rest |> read(rows, settings)
   end
 
   # All done
-  defp read("", lines, settings), do: lines
+  defp read("", rows, settings), do: rows
 
   defp skip_whitespace(<<char>> <> rest) when char in '\s\r' do
     skip_whitespace(rest)
