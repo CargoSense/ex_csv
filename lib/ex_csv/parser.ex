@@ -1,5 +1,5 @@
 defmodule ExCsv.Parser do
-  defstruct delimiter: 44, newline: 10, quote: 34, empty: ""
+  defstruct delimiter: 44, newline: 10, quote: 34
 
   def parse(text) do
     parse(text, %ExCsv.Parser{})
@@ -8,32 +8,34 @@ defmodule ExCsv.Parser do
     IO.iodata_to_binary(iodata) |> parse(settings)
   end
   def parse(string, settings) when is_binary(string) do
-    value(skip_whitespace(string), [[""]], settings)
+    value(skip_whitespace(string), [[]], settings)
     |> Enum.reverse |> Enum.map &(Enum.reverse(&1))
   end
 
   # Delimiter at the beginning of a line
-  defp value(<<char>> <> rest, [[] | previous], %{delimiter: char} = settings) do
-    value(skip_whitespace(rest), [[settings.empty, settings.empty] | previous], settings)
+  defp value(<<char>> <> rest, [[] | previous_lines], %{delimiter: char} = settings) do
+    value(skip_whitespace(rest), [["", ""] | previous_lines], settings)
   end
   # Delimiter after the beginning of a line
-  defp value(<<char>> <> rest, [[phrase | phrases] | previous], %{delimiter: char} = settings) do
-    value(skip_whitespace(rest), [[settings.empty | [phrase |> String.rstrip | phrases]] | previous], settings)
+  defp value(<<char>> <> rest, [[current_field | previous_fields] | previous_lines], %{delimiter: char} = settings) do
+    value(skip_whitespace(rest), [["" | [current_field |> String.rstrip | previous_fields]] | previous_lines], settings)
   end
 
   # Newline
-  defp value(<<char>> <> rest, [[phrase | phrases] | previous], %{newline: char} = settings) do
-    value(skip_whitespace(rest), [[] | [[ phrase |> String.rstrip | phrases] | previous]], settings)
+  defp value(<<char>> <> rest, [[current_field | previous_fields] | previous_lines], %{newline: char} = settings) do
+    value(skip_whitespace(rest), [[] | [[current_field |> String.rstrip | previous_fields] | previous_lines]], settings)
   end
 
-  # First phrase in a line
-  defp value(<<char>> <> rest, [[] | previous], settings) do
-    value(rest, [[[char] |> to_string] | previous], settings)
+  # Starting the first field in the current line
+  defp value(<<char>> <> rest, [[] | previous_lines], settings) do
+    value(rest, [[[char] |> IO.iodata_to_binary] | previous_lines], settings)
   end
-  # Another phrase in a line
-  defp value(<<char>> <> rest, [[phrase | phrases] | previous], settings) do
-    value(rest, [[phrase <> ([char] |> to_string) | phrases] | previous], settings)
+  # Adding to the last field in the current line
+  defp value(<<char>> <> rest, [[current_field | previous_fields] | previous_lines], settings) do
+    value(rest, [[current_field <> ([char] |> IO.iodata_to_binary) | previous_fields] | previous_lines], settings)
   end
+
+  # All done
   defp value("", lines, settings), do: lines
 
   defp skip_whitespace(<<char>> <> rest) when char in '\s\r' do
