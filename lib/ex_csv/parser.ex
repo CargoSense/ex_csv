@@ -31,12 +31,12 @@ defmodule ExCsv.Parser do
 
   # Starting the first field in the current row
   defp read(<<char>> <> rest, [[] | previous_rows], settings) do
-    rows = [[[char] |> IO.iodata_to_binary] | previous_rows]
+    rows = [[<<char::utf8>>] | previous_rows]
     rest |> read(rows, settings)
   end
   # Adding to the last field in the current row
   defp read(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], settings) do
-    rows = [[current_field <> ([char] |> IO.iodata_to_binary) | previous_fields] | previous_rows]
+    rows = [[current_field <> <<char::utf8>> | previous_fields] | previous_rows]
     rest |> read(rows, settings)
   end
 
