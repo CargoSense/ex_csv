@@ -29,17 +29,44 @@ defmodule ExCsvTest do
     assert table |> ExCsv.headings == ["a", "b", "c"]
   end
 
-  test "Enum.into with headings and :as" do
-    {:ok, table} = ExCsv.parse("cat,dog,bird\na,b,c\nd,e,f", headings: true, as: EasyRow)
-    assert table |> Enum.to_list == [%EasyRow{cat: "a", dog: "b", bird: "c"},
-                                     %EasyRow{cat: "d", dog: "e", bird: "f"}]
-  end
 
-  test "Enum.into with headings piping to ExCsv.row" do
+  test "table with headings piping to ExCsv.as" do
     {:ok, table} = ExCsv.parse("cat,dog,bird\na,b,c\nd,e,f", headings: true)
-    assert table |> ExCsv.row(EasyRow) |> Enum.to_list == [%EasyRow{cat: "a", dog: "b", bird: "c"},
+    assert table |> ExCsv.as(EasyRow) |> Enum.to_list == [%EasyRow{cat: "a", dog: "b", bird: "c"},
                                                            %EasyRow{cat: "d", dog: "e", bird: "f"}]
   end
 
+  test "table with headings piping to ExCsv.as with a string mapping" do
+    {:ok, table} = ExCsv.parse("field1,field2,field3\na,b,c\nd,e,f", headings: true)
+    mapping = %{"field1" => :dog, "field2" => :cat, "field3" => :bird}
+    assert table |> ExCsv.as(EasyRow, mapping) |> Enum.to_list == [%EasyRow{dog: "a", cat: "b", bird: "c"},
+                                                                   %EasyRow{dog: "d", cat: "e", bird: "f"}]
+  end
+
+  test "table with headings piping to ExCsv.as with a symbol mapping" do
+    {:ok, table} = ExCsv.parse("field1,field2,field3\na,b,c\nd,e,f", headings: true)
+    mapping = %{field1: :dog, field2: :cat, field3: :bird}
+    assert table |> ExCsv.as(EasyRow, mapping) |> Enum.to_list == [%EasyRow{dog: "a", cat: "b", bird: "c"},
+                                                                   %EasyRow{dog: "d", cat: "e", bird: "f"}]
+  end
+
+  test "table without headings and without a mapping list, piping to ExCsv.as" do
+    {:ok, table} = ExCsv.parse("a,b,c\nd,e,f")
+    assert_raise ArgumentError, fn ->
+      assert table |> ExCsv.as(EasyRow)
+    end
+  end
+
+  test "table without headings and with a mapping list of the same size, piping to ExCsv.as" do
+    {:ok, table} = ExCsv.parse("a,b,c\nd,e,f")
+    assert table |> ExCsv.as(EasyRow, [:bird, :cat, :dog]) |> Enum.to_list == [%EasyRow{bird: "a", cat: "b", dog: "c"},
+                                                                                %EasyRow{bird: "d", cat: "e", dog: "f"}]
+  end
+
+  test "table without headings and with a mapping list of a smaller size, piping to ExCsv.as" do
+    {:ok, table} = ExCsv.parse("a,b,c\nd,e,f")
+    assert table |> ExCsv.as(EasyRow, [:bird, :cat]) |> Enum.to_list == [%EasyRow{bird: "a", cat: "b", dog: nil},
+                                                                          %EasyRow{bird: "d", cat: "e", dog: nil}]
+  end
 
 end
