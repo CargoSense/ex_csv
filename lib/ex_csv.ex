@@ -16,9 +16,10 @@ defmodule ExCsv do
     %{ table | row_struct: row_struct, row_mapping: row_mapping }
   end
 
-  def add_headings(table, headings), do: %{ table | headings: headings }
-  def add_headings(%{body: [first | rest]} = table) do
+  def with_headings(table, headings), do: %{ table | headings: headings }
+  def with_headings(%{body: [first | rest]} = table) do
     %{ table | body: rest, headings: first }
   end
 
+  def without_headings(table), do: %{ table | headings: [] }
 end

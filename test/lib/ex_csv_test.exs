@@ -31,12 +31,17 @@ defmodule ExCsvTest do
 
   test "with headings, post parse" do
     {:ok, table} = ExCsv.parse("from,to,cc\na,b,c")
-    assert table |> ExCsv.add_headings |> Enum.to_list == [%{"from" => "a", "to" => "b", "cc" => "c"}]
+    assert table |> ExCsv.with_headings |> Enum.to_list == [%{"from" => "a", "to" => "b", "cc" => "c"}]
   end
 
   test "with headings, post parse and provided" do
     {:ok, table} = ExCsv.parse("a,b,c")
-    assert table |> ExCsv.add_headings(~w(From To CC)) |> Enum.to_list == [%{"From" => "a", "To" => "b", "CC" => "c"}]
+    assert table |> ExCsv.with_headings(~w(From To CC)) |> Enum.to_list == [%{"From" => "a", "To" => "b", "CC" => "c"}]
+  end
+
+  test "with headings, then removing them" do
+    {:ok, table} = ExCsv.parse("from,to,cc\na,b,c", headings: true)
+    assert table |> ExCsv.without_headings |> Enum.to_list == [~w"a b c"]
   end
 
   test ".headings when requested" do
