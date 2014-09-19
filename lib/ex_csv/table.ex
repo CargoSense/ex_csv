@@ -1,5 +1,5 @@
 defmodule ExCsv.Table do
-  defstruct headings: [], body: []
+  defstruct headings: [], body: [], row_struct: nil
 
   defimpl Enumerable, for: __MODULE__ do
     def count(%ExCsv.Table{body: body}), do: body |> length
@@ -14,9 +14,19 @@ defmodule ExCsv.Table do
       reduce(%{ table | body: t }, fun.(h, acc), fun)
     end
     def reduce(%ExCsv.Table{body: [h|t], headings: headings} = table, {:cont, acc}, fun) do
-      map = Enum.zip(headings, h) |> Enum.into(%{})
-      reduce(%{ table | body: t }, fun.(map, acc), fun)
+      value = Enum.zip(headings, h) |> Enum.into(%{}) |> construct(table.row_struct)
+      reduce(%{ table | body: t }, fun.(value, acc), fun)
     end
+
+    defp construct(row, nil), do: row
+    defp construct(row, row_struct) do
+      base = struct(row_struct)
+      add = Enum.map row, fn {k, v} ->
+        {k |> String.to_existing_atom, v}
+      end
+      struct(base, add)
+    end
+
   end
 
 end

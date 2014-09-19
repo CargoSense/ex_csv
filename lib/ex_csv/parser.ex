@@ -1,5 +1,5 @@
 defmodule ExCsv.Parser do
-  defstruct delimiter: 44, newline: 10, quote: 34, headings: false, quoting: false, eat_next_quote: true
+  defstruct delimiter: 44, newline: 10, quote: 34, headings: false, as: nil, quoting: false, eat_next_quote: true
 
   def parse(text, opts \\ []) do
     do_parse(text, opts |> configure)
@@ -15,8 +15,8 @@ defmodule ExCsv.Parser do
     else
       [head | tail] = result |> Enum.reverse |> Enum.map &(Enum.reverse(&1))
       case config.headings do
-        true  -> {:ok, %ExCsv.Table{headings: head, body: tail}}
-        false -> {:ok, %ExCsv.Table{body: [head | tail]}}
+        true  -> {:ok, %ExCsv.Table{headings: head, body: tail, row_struct: config.as}}
+        false -> {:ok, %ExCsv.Table{body: [head | tail], row_struct: config.as}}
       end
     end
   end
@@ -35,7 +35,7 @@ defmodule ExCsv.Parser do
   defp setting({key, value}) when key in [:delimiter, :newline, :quote] do
     [{key, value |> hd}] |> Enum.into(%{})
   end
-  defp setting({:headings, true}), do: %{headings: true}
+  defp setting({key, value}), do: [{key, value}] |> Enum.into(%{})
 
   # DELIMITER
   # At the beginning of a row
