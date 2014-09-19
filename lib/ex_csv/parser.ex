@@ -6,7 +6,7 @@ defmodule ExCsv.Parser do
   end
 
   defp do_parse(iodata, config) when is_list(iodata) do
-    iodata |> IO.iodata_to_binary |> parse(config)
+    iodata |> IO.iodata_to_binary |> do_parse(config)
   end
   defp do_parse(string, config) when is_binary(string) do
     {result, state} = string |> skip_dotall |> build([[""]], config)
