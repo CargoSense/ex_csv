@@ -14,21 +14,35 @@ defmodule ExCsvTest do
     {:ok, %{body: [~w(a b c)]}} = ExCsv.parse("a;b;c", delimiter: ';')
   end
 
-  test "headings when not requested" do
+  test ".headings when not requested" do
     {:ok, table} = ExCsv.parse("a,b,c")
     assert table |> ExCsv.headings == []
   end
 
-  test "Enum.into without headings" do
+  test "without headings" do
     {:ok, table} = ExCsv.parse("a,b,c")
     assert table |> Enum.to_list == [["a", "b", "c"]]
   end
 
-  test "headings when requested" do
+  test "with headings" do
+    {:ok, table} = ExCsv.parse("from,to,cc\na,b,c", headings: true)
+    assert table |> Enum.to_list == [%{"from" => "a", "to" => "b", "cc" => "c"}]
+  end
+
+  test "with headings, post parse" do
+    {:ok, table} = ExCsv.parse("from,to,cc\na,b,c")
+    assert table |> ExCsv.add_headings |> Enum.to_list == [%{"from" => "a", "to" => "b", "cc" => "c"}]
+  end
+
+  test "with headings, post parse and provided" do
+    {:ok, table} = ExCsv.parse("a,b,c")
+    assert table |> ExCsv.add_headings(~w(From To CC)) |> Enum.to_list == [%{"From" => "a", "To" => "b", "CC" => "c"}]
+  end
+
+  test ".headings when requested" do
     {:ok, table} = ExCsv.parse("a,b,c", headings: true)
     assert table |> ExCsv.headings == ["a", "b", "c"]
   end
-
 
   test "table with headings piping to ExCsv.as" do
     {:ok, table} = ExCsv.parse("cat,dog,bird\na,b,c\nd,e,f", headings: true)

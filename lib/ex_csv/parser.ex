@@ -1,5 +1,5 @@
 defmodule ExCsv.Parser do
-  defstruct delimiter: 44, newline: 10, quote: 34, headings: false, quoting: false, eat_next_quote: true
+  defstruct delimiter: 44, newline: 10, quote: 34, headings: false, quoting: false, quote_at: nil, eat_next_quote: true
 
   def parse(text, opts \\ []) do
     do_parse(text, opts |> configure)
@@ -9,11 +9,12 @@ defmodule ExCsv.Parser do
     iodata |> IO.iodata_to_binary |> parse(config)
   end
   defp do_parse(string, config) when is_binary(string) do
-    {result, state} = string |> skip_whitespace |> build([[]], config)
+    {result, state} = string |> skip_dotall |> build([[""]], config)
     if state.quoting do
-      {:error, "quote meets end of file"}
+      info = result |> hd |> hd |> String.slice(0, 10)
+      {:error, "quote meets end of file; started near: #{info}"}
     else
-      [head | tail] = result |> Enum.reverse |> Enum.map &(Enum.reverse(&1))
+      [head | tail] = result |> rstrip |> Enum.reverse |> Enum.map &(Enum.reverse(&1))
       case config.headings do
         true  -> {:ok, %ExCsv.Table{headings: head, body: tail}}
         false -> {:ok, %ExCsv.Table{body: [head | tail]}}
@@ -97,12 +98,20 @@ defmodule ExCsv.Parser do
   # EOF
   defp build("", rows, config), do: {rows, config}
 
+  defp rstrip([[""] | rows]), do: rows
+  defp rstrip(rows), do: rows
+
   defp skip_whitespace(<<char>> <> rest) when char in '\s\r' do
     skip_whitespace(rest)
   end
   defp skip_whitespace(string), do: string
 
+  defp skip_dotall(<<char>> <> rest) when char in '\s\r\n\t' do
+    skip_dotall(rest)
+  end
+  defp skip_dotall(string), do: string
+
   defp new_field, do: ""
-  defp new_row, do: []
+  defp new_row, do: [new_field]
 
 end
