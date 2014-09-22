@@ -67,11 +67,8 @@ will result in a list for each row:
 ```elixir
 table = File.read!("foo/bar.csv")
         |> ExCsv.parse
-# => %ExCsv.Table{...}
-for row <- table, do: IO.inspect(row)
-# ["Jayson", 23]
-# ["Jill", 34]
-# ["Benson", 45]
+        |> Enum.to_list
+# [["Jayson", 23], ["Jill", 34], ["Benson", 45]]
 ```
 
 If your table has headings, you'll get maps:
@@ -80,11 +77,10 @@ If your table has headings, you'll get maps:
 table = File.read!("foo/bar.csv")
         |> ExCsv.parse
         |> ExCsv.with_headings([:name, :age])
-# => %ExCsv.Table{...}
-for row <- table, do: IO.inspect(row)
-# %{name: "Jayson", age: 23}
-# %{name: "Jill", age: 34}
-# %{name: "Benson", age: 45}
+        |> Enum.to_list
+# [%{name: "Jayson", age: 23},
+#  %{name: "Jill", age: 34},
+#  %{name: "Benson", age: 45}]
 ```
 
 You can build structs from the rows by using `ExCsv.as/1` (if the
@@ -95,11 +91,10 @@ table = File.read!("foo/bar.csv")
         |> ExCsv.parse
         |> ExCsv.with_headings([:name, :age])
         |> ExCsv.as(Person)
-# => %ExCsv.Table{...}
-for row <- table, do: IO.inspect(row)
-# %Person{name: "Jayson", age: 23}
-# %Person{name: "Jill", age: 34}
-# %Person{name: "Benson", age: 45}
+        |> Enum.to_list
+# [%Person{name: "Jayson", age: 23},
+#  %Person{name: "Jill", age: 34},
+#  %Person{name: "Benson", age: 45}]
 ```
 
 If the headings don't match the struct attributes, you can provide a
@@ -110,10 +105,9 @@ mapping (of CSV heading name to struct attribute name) with
 table = File.read!("books.csv")
         |> ExCsv.parse(headings: true)
         |> ExCsv.as(Author, %{"name" => :title, "author" => :name})
-# => %ExCsv.Table{...}
-for row <- table, do: IO.inspect(row)
-# %Author{name: "John Scalzi", title: "A War for Old Men"}
-# %Author{name: "Margaret Atwood", title: "A Handmaid's Tale"}
+        |> Enum.to_list
+# [%Author{name: "John Scalzi", title: "A War for Old Men"},
+#  %Author{name: "Margaret Atwood", title: "A Handmaid's Tale"}]
 ```
 
 ## Contributing
