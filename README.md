@@ -37,7 +37,7 @@ table.headings
 ```
 
 You can also change the set or change headings by using
-`ExCsv.headings/2`:
+`ExCsv.with_headings/2`:
 
 ```elixir
 table = File.read!("foo/bar.csv")
