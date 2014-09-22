@@ -3,9 +3,10 @@ defmodule ExCsv.Mixfile do
 
   def project do
     [app: :ex_csv,
-     version: "0.0.1",
+     version: "0.1.0",
      elixir: "~> 1.0.0",
-     deps: deps]
+     deps: deps,
+     package: package]
   end
 
   # Configuration for the OTP application
@@ -13,6 +14,13 @@ defmodule ExCsv.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: [:logger]]
+  end
+
+  defp package do
+    [contributors: ["Bruce Williams"],
+     licenses: ["MIT License"],
+     description: "CSV for Elixir",
+     links: %{github: "https://github.com/CargoSense/ex_csv"}]
   end
 
   # Dependencies can be Hex packages:
