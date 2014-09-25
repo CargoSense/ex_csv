@@ -1,6 +1,13 @@
 defmodule ExCsv.Parser do
   defstruct delimiter: 44, newline: 10, quote: 34, headings: false, quoting: false, quote_at: nil, eat_next_quote: true
 
+  def parse!(text, opts \\ []) do
+    case parse(text, opts) do
+      {:ok, table} -> table
+      {:error, err} -> raise ArgumentError, err
+    end
+  end
+
   def parse(text, opts \\ []) do
     do_parse(text, opts |> configure)
   end

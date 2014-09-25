@@ -1,8 +1,11 @@
 defmodule ExCsv.ParserTest do
   use ExUnit.Case
 
-  test "one simple line" do
+  test "one simple line with parse" do
     assert ExCsv.Parser.parse(~s<a,b,c>) |> body == [["a", "b", "c"]]
+  end
+  test "one simple line with parse!" do
+    assert ExCsv.Parser.parse!(~s<a,b,c>).body == [["a", "b", "c"]]
   end
   test "one simple line with a space in a field" do
     assert ExCsv.Parser.parse(~s<a,ba t,c>) |> body == [["a", "ba t", "c"]]
@@ -18,6 +21,9 @@ defmodule ExCsv.ParserTest do
   end
   test "one simple line with a quoted field that is not finished" do
     assert {:error, _} = ExCsv.Parser.parse(~s<a,"ba,t,c>)
+  end
+  test "one simple line with a quoted field that is not finished with parse!" do
+    assert_raise ArgumentError, fn -> ExCsv.Parser.parse!(~s<a,"ba,t,c>) end
   end
   test "one simple line that starts with a delimiter" do
     assert ExCsv.Parser.parse(~s<,a,b,c>) |> body == [["", "a", "b", "c"]]

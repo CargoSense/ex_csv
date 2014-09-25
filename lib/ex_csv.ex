@@ -1,6 +1,6 @@
 defmodule ExCsv do
 
-  defdelegate [parse(text), parse(text, settings)], to: ExCsv.Parser
+  defdelegate [parse(text), parse(text, settings), parse!(text), parse!(text, settings)], to: ExCsv.Parser
 
   def headings(%{headings: headings}), do: headings
   def body(%{body: body}), do: body

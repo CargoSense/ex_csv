@@ -13,14 +13,17 @@ Parsing a file gives you a `ExCsv.Table` struct:
 
 ```elixir
 File.read!("foo/bar.csv") |> ExCsv.parse
-# => %ExCsv.Table{...}
+# => {:ok, %ExCsv.Table{...}}
 ```
+
+(You can alse use `ExCsv.parse!/1` which will raise an error instead
+of returning an `{:error, err}` tuple if parsing fails.)
 
 If your CSV has headings, you can let the parser know up front:
 
 ```elixir
-table = File.read!("foo/bar.csv") |> ExCsv.parse(headings: true)
-# => %ExCsv.Table{...}
+{:ok, table} = File.read!("foo/bar.csv") |> ExCsv.parse(headings: true)
+# => {:ok, %ExCsv.Table{...}}
 table.headings
 # => ["Person", "Current Age"]
 ```
@@ -28,9 +31,9 @@ table.headings
 Or you can use `ExCsv.with_headings/1` afterwards:
 
 ```elixir
-table = File.read!("foo/bar.csv")
-        |> ExCsv.parse
-        |> ExCsv.with_headings
+{:ok, table} = File.read!("foo/bar.csv")
+               |> ExCsv.parse!
+               |> ExCsv.with_headings
 # => %ExCsv.Table{...}
 table.headings
 # => ["Person", "Current"]
@@ -41,7 +44,7 @@ You can also change the set or change headings by using
 
 ```elixir
 table = File.read!("foo/bar.csv")
-        |> ExCsv.parse
+        |> ExCsv.parse!
         |> ExCsv.with_headings(["name", "age"])
 # => %ExCsv.Table{...}
 table.headings
@@ -52,7 +55,7 @@ If you need to parse a format that uses another delimiter character,
 you can set it as an option (note the single quotes):
 
 ```elixir
-table = File.read!("foo/bar.csv", delimiter: ';')
+table = File.read!("foo/bar.csv") |> ExCsv.parse!(delimiter: ';')
 # => %ExCsv.Table{...}
 ```
 
@@ -66,7 +69,7 @@ will result in a list for each row:
 
 ```elixir
 table = File.read!("foo/bar.csv")
-        |> ExCsv.parse
+        |> ExCsv.parse!
         |> Enum.to_list
 # [["Jayson", 23], ["Jill", 34], ["Benson", 45]]
 ```
@@ -75,7 +78,7 @@ If your table has headings, you'll get maps:
 
 ```elixir
 table = File.read!("foo/bar.csv")
-        |> ExCsv.parse
+        |> ExCsv.parse!
         |> ExCsv.with_headings([:name, :age])
         |> Enum.to_list
 # [%{name: "Jayson", age: 23},
@@ -88,7 +91,7 @@ headings match the struct attributes):
 
 ```elixir
 table = File.read!("foo/bar.csv")
-        |> ExCsv.parse
+        |> ExCsv.parse!
         |> ExCsv.with_headings([:name, :age])
         |> ExCsv.as(Person)
         |> Enum.to_list
@@ -103,7 +106,7 @@ mapping (of CSV heading name to struct attribute name) with
 
 ```elixir
 table = File.read!("books.csv")
-        |> ExCsv.parse(headings: true)
+        |> ExCsv.parse(headings: true)!
         |> ExCsv.as(Author, %{"name" => :title, "author" => :name})
         |> Enum.to_list
 # [%Author{name: "John Scalzi", title: "A War for Old Men"},
