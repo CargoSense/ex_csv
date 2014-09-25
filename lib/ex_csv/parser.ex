@@ -82,7 +82,7 @@ defmodule ExCsv.Parser do
   end
 
   # NEWLINE
-  defp build(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{newline: char} = config) do
+  defp build(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{newline: char, quoting: false} = config) do
     current_row = [current_field |> String.rstrip | previous_fields]
     rows = [new_row | [current_row | previous_rows]]
     rest |> skip_whitespace |> build(rows, config)

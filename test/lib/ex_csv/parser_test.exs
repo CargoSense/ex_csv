@@ -13,6 +13,9 @@ defmodule ExCsv.ParserTest do
   test "one simple line with a quoted field containing the delimiter" do
     assert ExCsv.Parser.parse(~s<a,"ba,t",c>) |> body == [["a", "ba,t", "c"]]
   end
+  test "one simple line with a quoted field containing a newline" do
+    assert ExCsv.Parser.parse(~s<a,"ba\nt",c>) |> body == [["a", "ba\nt", "c"]]
+  end
   test "one simple line with a quoted field containing the delimiter followed by whitespace" do
     assert ExCsv.Parser.parse(~s<a,"ba,t" ,c>) |> body == [["a", "ba,t", "c"]]
   end
