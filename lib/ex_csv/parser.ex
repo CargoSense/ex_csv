@@ -91,13 +91,13 @@ defmodule ExCsv.Parser do
   # NORMAL CHARACTER
   # Starting the first field in the current row
   defp build(<<char>> <> rest, [[] | previous_rows], config) do
-    current_row = [<<char::utf8>>]
+    current_row = [<<char>>]
     rows = [current_row | previous_rows]
     rest |> build(rows, config)
   end
   # Adding to the last field in the current row
   defp build(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], config) do
-    current_row = [current_field <> <<char::utf8>> | previous_fields]
+    current_row = [current_field <> <<char>> | previous_fields]
     rows = [current_row | previous_rows]
     rest |> build(rows, config)
   end
