@@ -106,7 +106,7 @@ mapping (of CSV heading name to struct attribute name) with
 
 ```elixir
 table = File.read!("books.csv")
-        |> ExCsv.parse(headings: true)!
+        |> ExCsv.parse!(headings: true)
         |> ExCsv.as(Author, %{"name" => :title, "author" => :name})
         |> Enum.to_list
 # [%Author{name: "John Scalzi", title: "A War for Old Men"},
