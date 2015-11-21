@@ -17,7 +17,7 @@ defmodule ExCsv.Mixfile do
   end
 
   defp package do
-    [maintainers: ["Bruce Williams"],
+    [maintainers: ["Bruce Williams", "Ben Wilson"],
      licenses: ["MIT License"],
      description: "CSV for Elixir",
      links: %{github: "https://github.com/CargoSense/ex_csv"}]
