@@ -1,10 +1,9 @@
+defmodule EasyRow do
+  defstruct cat: nil, dog: nil, bird: nil
+end
+
 defmodule ExCsvTest do
   use ExUnit.Case
-
-  defmodule EasyRow do
-    @derive [Enumerable, Access]
-    defstruct cat: nil, dog: nil, bird: nil
-  end
 
   test "parse delegate without custom setting" do
     {:ok, %{body: [~w(a b c)]}} = ExCsv.parse("a,b,c")
