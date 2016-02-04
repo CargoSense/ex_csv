@@ -21,7 +21,7 @@ defmodule ExCsv.Parser do
       info = result |> hd |> hd |> String.slice(0, 10)
       {:error, "quote meets end of file; started near: #{info}"}
     else
-      [head | tail] = result |> rstrip |> Enum.reverse |> Enum.map &(Enum.reverse(&1))
+      [head | tail] = result |> rstrip |> Enum.reverse |> Enum.map(&(Enum.reverse(&1)))
       case config.headings do
         true  -> {:ok, %ExCsv.Table{headings: head, body: tail}}
         false -> {:ok, %ExCsv.Table{body: [head | tail]}}
