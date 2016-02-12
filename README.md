@@ -78,7 +78,7 @@ If your table has headings, you'll get maps:
 
 ```elixir
 table = File.read!("foo/bar.csv")
-        |> ExCsv.parse!
+        |> ExCsv.parse!(headings: true)
         |> ExCsv.with_headings([:name, :age])
         |> Enum.to_list
 # [%{name: "Jayson", age: 23},
@@ -91,7 +91,7 @@ headings match the struct attributes):
 
 ```elixir
 table = File.read!("foo/bar.csv")
-        |> ExCsv.parse!
+        |> ExCsv.parse!(headings: true)
         |> ExCsv.with_headings([:name, :age])
         |> ExCsv.as(Person)
         |> Enum.to_list
