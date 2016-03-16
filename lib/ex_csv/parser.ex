@@ -1,5 +1,5 @@
 defmodule ExCsv.Parser do
-  defstruct delimiter: 44, newline: 10, quote: 34, headings: false, quoting: false, quote_at: nil, eat_next_quote: true
+  defstruct delimiter: 44, return: 13, newline: 10, quote: 34, headings: false, quoting: false, quote_at: nil, eat_next_quote: true
 
   def parse!(text, opts \\ []) do
     case parse(text, opts) do
@@ -82,10 +82,14 @@ defmodule ExCsv.Parser do
   end
 
   # NEWLINE
-  defp build(<<char>> <> rest, [[current_field | previous_fields] | previous_rows], %{newline: char, quoting: false} = config) do
-    current_row = [current_field |> String.rstrip | previous_fields]
-    rows = [new_row | [current_row | previous_rows]]
-    rest |> skip_whitespace |> build(rows, config)
+  defp build(<<rt,nl>> <> rest, [[current_field | previous_fields] | previous_rows], %{return: rt, newline: nl, quoting: false} = config) do
+    build_newline(rest, current_field, previous_fields, previous_rows, config)
+  end
+  defp build(<<rt>> <> rest, [[current_field | previous_fields] | previous_rows], %{return: rt, quoting: false} = config) do
+    build_newline(rest, current_field, previous_fields, previous_rows, config)
+  end
+  defp build(<<nl>> <> rest, [[current_field | previous_fields] | previous_rows], %{newline: nl, quoting: false} = config) do
+    build_newline(rest, current_field, previous_fields, previous_rows, config)
   end
 
   # NORMAL CHARACTER
@@ -104,6 +108,12 @@ defmodule ExCsv.Parser do
 
   # EOF
   defp build("", rows, config), do: {rows, config}
+
+  defp build_newline(rest, current_field, previous_fields, previous_rows, config) do
+    current_row = [current_field |> String.rstrip | previous_fields]
+    rows = [new_row | [current_row | previous_rows]]
+    rest |> skip_whitespace |> build(rows, config)
+  end
 
   defp rstrip([[""] | rows]), do: rows
   defp rstrip(rows), do: rows

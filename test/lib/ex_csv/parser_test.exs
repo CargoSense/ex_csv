@@ -54,6 +54,14 @@ defmodule ExCsv.ParserTest do
     assert ExCsv.Parser.parse(~s<a,b,c\n,e,f>) |> body == [["a", "b", "c"], ["", "e", "f"]]
   end
 
+  test "two simple lines with return character" do
+    assert ExCsv.Parser.parse(~s<a,b,c\rd,e,f>) |> body == [["a", "b", "c"], ["d", "e", "f"]]
+  end
+
+  test "two simple lines with return and newline" do
+    assert ExCsv.Parser.parse(~s<a,b,c\r\nd,e,f>) |> body == [["a", "b", "c"], ["d", "e", "f"]]
+  end
+
   defp body({:ok, %{body: body}}), do: body
 
 end
