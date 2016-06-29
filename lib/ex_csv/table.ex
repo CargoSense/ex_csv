@@ -4,10 +4,10 @@ defmodule ExCsv.Table do
 
   defimpl Enumerable, for: __MODULE__ do
     def count(%ExCsv.Table{body: body}), do: body |> length
-    def member?(%ExCsv.Table{body: body}, value), do: {:error, __MODULE__}
+    def member?(%ExCsv.Table{}, _), do: {:error, __MODULE__}
 
     def reduce(_,     {:halt, acc}, _fun), do: {:halted, acc}
-    def reduce(%ExCsv.Table{body: list} = table,  {:suspend, acc}, fun) do
+    def reduce(%ExCsv.Table{} = table,  {:suspend, acc}, fun) do
       {:suspended, acc, &reduce(table, &1, fun)}
     end
     def reduce(%ExCsv.Table{body: []},    {:cont, acc}, _fun), do: {:done, acc}
